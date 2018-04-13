@@ -54,7 +54,10 @@ public class MainGameLoop {
 		grass.getTexture().setUseFakeLighting(true);
 		*/
 		
-		TexturedModel fern = new TexturedModel(OBJLoader.loadObjModel("fern", loader), new ModelTexture(loader.loadTexture("fern")));
+		ModelTexture fernTextureAtlas = new ModelTexture(loader.loadTexture("fernatlas"));
+		fernTextureAtlas.setNumberOfRows(2);
+		
+		TexturedModel fern = new TexturedModel(OBJLoader.loadObjModel("fern", loader), fernTextureAtlas);
 		fern.getTexture().setHasTransparency(true);
 		
 		//***********************************************
@@ -63,7 +66,7 @@ public class MainGameLoop {
 		//******Initialize Light, Camera, Terrain, Renderer, ETC******
 		Light light = new Light(new Vector3f(20000,20000,2000),new Vector3f(1,1,1));
 		
-		Player player = new Player(stanfordBunny, new Vector3f(0, 0, 0), 0, 0, 0, 0.5f);
+		Player player = new Player(stanfordBunny, new Vector3f(0, 0, -200), 0, 0, 0, 0.5f);
 		
 		Terrain terrain = new Terrain(-0.5f,-1,loader, texturePack, blendMap, "heightmap");
 		
@@ -84,11 +87,11 @@ public class MainGameLoop {
 				entities.add(new Entity(tree, new Vector3f(x,y,z),0,random.nextFloat() * 360 ,0,6));
 			}
 			
-			if (i % 10 == 0) {
+			if (i % 1 == 0) {
 				float x = random.nextFloat()*800 - 400;
 				float z = random.nextFloat() * -600;
 				float y = terrain.getHeightOfTerrain(x,z);
-				entities.add(new Entity(fern, new Vector3f(x,y,z),0,random.nextFloat() * 360 ,0,0.5f));
+				entities.add(new Entity(fern, random.nextInt(4), new Vector3f(x,y,z), 0, random.nextFloat() * 360, 0, 0.5f));
 			}
 		}
 		
