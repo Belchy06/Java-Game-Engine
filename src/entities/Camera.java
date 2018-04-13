@@ -9,8 +9,8 @@ public class Camera {
 	private float angleAroundPlayer = 0;
 	
 	private Vector3f position = new Vector3f(0,25,0);
-	private float pitch = 10;
-	private float yaw ;
+	private float pitch = 20;
+	private float yaw;
 	private float roll;
 	
 	private Player player;
@@ -29,6 +29,10 @@ public class Camera {
 		calculateCameraPosition(horizontalDistance, verticalDistance);
 		this.yaw = 180 - (player.getRotY() + angleAroundPlayer);
 		
+	}
+	
+	public void invertPitch() {
+		this.pitch = -pitch;
 	}
 
 	public Vector3f getPosition() {
@@ -72,7 +76,10 @@ public class Camera {
 	private void calculatePitch() {
 		if(Mouse.isButtonDown(1)) {
 			float pitchChange = Mouse.getDY() * 0.1f;
-			pitch -= pitchChange;
+			System.out.println(pitchChange);
+			if((pitch < 90 || pitchChange > 0) && (pitch > 10 || pitchChange < 0)) {
+				pitch -= pitchChange;
+			} 
 		}
 	}
 	
