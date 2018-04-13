@@ -18,6 +18,7 @@ import terrains.Terrain;
 import textures.ModelTexture;
 import textures.TerrainTexture;
 import textures.TerrainTexturePack;
+import toolbox.MousePicker;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
@@ -84,7 +85,7 @@ public class MainGameLoop {
 		Terrain terrain = new Terrain(-0.5f,-1,loader, texturePack, blendMap, "heightmap");
 		
 		Camera camera = new Camera(player);	
-		MasterRenderer renderer = new MasterRenderer();
+		MasterRenderer renderer = new MasterRenderer(loader);
 		
 		//************************************************************
 
@@ -107,15 +108,13 @@ public class MainGameLoop {
 				float y = terrain.getHeightOfTerrain(x,z);
 				entities.add(new Entity(fern, random.nextInt(4), new Vector3f(x,y,z), 0, random.nextFloat() * 360, 0, 0.5f));
 			}
-			
-			if (i % 100 == 0) {
-				float x = random.nextFloat()*800 - 400;
-				float z = random.nextFloat() * -600;
-				float y = terrain.getHeightOfTerrain(x,z);
-				entities.add(new Entity(lamp, new Vector3f(x,y,z),0,0,0,1));
-				lights.add(new Light(new Vector3f(x,y+5.0f,z), new Vector3f(2,2,0), new Vector3f(1,0.01f,0.002f)));
-			}
 		}
+		
+		Entity lampEntity = (new Entity(lamp, new Vector3f(293, -6.8f, -305), 0, 0, 0, 1));
+		entities.add(lampEntity);
+		
+		Light light = (new Light(new Vector3f(293, 7, -305), new Vector3f(0, 2, 2), new Vector3f(1, 0.01f, 0.002f)));
+		lights.add(light);
 		
 		//**************************
 		
@@ -129,18 +128,28 @@ public class MainGameLoop {
 		
 		//***************
 		
+		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix(), terrain);
 		
 		//******Render******
 		while(!Display.isCloseRequested()){			
 			player.move(terrain);
 			camera.move();
-			renderer.render(lights, camera);
+			
+			picker.update();
+			Vector3f terrainPoint = picker.getCurrentTerrainPoint();
+			if(terrainPoint!=null) {
+				lampEntity.setPosition(terrainPoint);
+				light.setPosition(new Vector3f(terrainPoint.x, terrainPoint.y+15, terrainPoint.z));
+			}
+			System.out.println(picker.getCurrentRay());
+			
 			renderer.processEntity(player);
 			renderer.processTerrain(terrain);
 			for(Entity entity:entities){
 				renderer.processEntity(entity);
 			}
 			
+			renderer.render(lights, camera);
 			guiRenderer.render(guis);
 			DisplayManager.updateDisplay();
 		}
