@@ -75,8 +75,8 @@ public class MainGameLoop {
 		
 		Player player = new Player(stanfordBunny, new Vector3f(0, 0, -50), 0, 0, 0, 1);
 		
-		Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap);
-		Terrain terrain2 = new Terrain(-1,-1,loader, texturePack, blendMap);
+		Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap, "heightmap");
+		Terrain terrain2 = new Terrain(-1,-1,loader, texturePack, blendMap, "heightmap");
 		
 		Camera camera = new Camera(player);	
 		MasterRenderer renderer = new MasterRenderer();
