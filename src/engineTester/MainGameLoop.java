@@ -7,6 +7,7 @@ import java.util.Random;
 import models.TexturedModel;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import renderEngine.DisplayManager;
@@ -21,6 +22,8 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import guis.GuiRenderer;
+import guis.GuiTexture;
 
 public class MainGameLoop {
 
@@ -31,8 +34,8 @@ public class MainGameLoop {
 		
 		//******Load Terrain Textures******
 		TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("grassy"));
-		TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("dirt"));
-		TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("pinkFlowers"));
+		TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("mud"));
+		TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("grassFlowers"));
 		TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("path"));
 		
 		TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
@@ -42,8 +45,8 @@ public class MainGameLoop {
 		
 		
 		//******Load Models and respective textures******	
-		TexturedModel stanfordBunny = new TexturedModel(OBJLoader.loadObjModel("stanfordBunny", loader), new ModelTexture(loader.loadTexture("white")));
-		stanfordBunny.getTexture().setHasTransparency(false);
+		TexturedModel character = new TexturedModel(OBJLoader.loadObjModel("person", loader), new ModelTexture(loader.loadTexture("playerTexture")));
+		character.getTexture().setHasTransparency(false);
 		
 		TexturedModel tree = new TexturedModel(OBJLoader.loadObjModel("tree", loader),new ModelTexture(loader.loadTexture("tree")));
 		tree.getTexture().setHasTransparency(false);
@@ -66,7 +69,7 @@ public class MainGameLoop {
 		//******Initialize Light, Camera, Terrain, Renderer, ETC******
 		Light light = new Light(new Vector3f(20000,20000,2000),new Vector3f(1,1,1));
 		
-		Player player = new Player(stanfordBunny, new Vector3f(0, 0, -200), 0, 0, 0, 0.5f);
+		Player player = new Player(character, new Vector3f(0, 0, -200), 0, 0, 0, 0.5f);
 		
 		Terrain terrain = new Terrain(-0.5f,-1,loader, texturePack, blendMap, "heightmap");
 		
@@ -98,6 +101,16 @@ public class MainGameLoop {
 		//**************************
 		
 		
+		//******GUI******
+		List<GuiTexture> guis = new ArrayList<GuiTexture>();
+		GuiTexture gui = new GuiTexture(loader.loadTexture("socuwan"), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f,0.25f));
+		guis.add(gui);
+		
+		GuiRenderer guiRenderer = new GuiRenderer(loader);
+		
+		//***************
+		
+		
 		//******Render******
 		while(!Display.isCloseRequested()){			
 			player.move(terrain);
@@ -108,12 +121,13 @@ public class MainGameLoop {
 				renderer.processEntity(entity);
 			}
 			renderer.render(light, camera);
+			guiRenderer.render(guis);
 			DisplayManager.updateDisplay();
 		}
 		
 		//******************
 
-		
+		guiRenderer.cleanUp();
 		renderer.cleanUp();
 		loader.cleanUp();
 		DisplayManager.closeDisplay();
