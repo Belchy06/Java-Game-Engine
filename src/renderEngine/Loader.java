@@ -1,12 +1,14 @@
 package renderEngine;
 
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import models.RawModel;
+import textures.TextureData;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -16,6 +18,9 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
+
+import de.matthiasmann.twl.utils.PNGDecoder;
+import de.matthiasmann.twl.utils.PNGDecoder.Format;
 
 public class Loader {
 	
@@ -68,6 +73,28 @@ public class Loader {
 			GL11.glDeleteTextures(texture);
 		}
 	}
+	
+	private TextureData decodeTextureFile(String fileName) {
+		int width = 0;
+		int height = 0;
+		ByteBuffer buffer = null;
+		try {
+			FileInputStream in = new FileInputStream(fileName);
+			PNGDecoder decoder = new PNGDecoder(in);
+			width = decoder.getWidth();
+			height = decoder.getHeight();
+			buffer = ByteBuffer.allocateDirect(4 * width * height);
+			decoder.decode(buffer,  width * 4,  Format.RGBA);
+			buffer.flip();
+			in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Tried to load texture " + fileName + ", could not load");
+			System.exit(-1);
+		}
+		return new TextureData(buffer, width, height);
+	}
+	
 	
 	private int createVAO(){
 		int vaoID = GL30.glGenVertexArrays();
