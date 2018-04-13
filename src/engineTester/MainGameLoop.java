@@ -48,9 +48,11 @@ public class MainGameLoop {
 		TexturedModel tree = new TexturedModel(OBJLoader.loadObjModel("tree", loader),new ModelTexture(loader.loadTexture("tree")));
 		tree.getTexture().setHasTransparency(false);
 		
-		TexturedModel grass = new TexturedModel(OBJLoader.loadObjModel("grassModel", loader), new ModelTexture(loader.loadTexture("grassTexture")));
+		/*
+		 * TexturedModel grass = new TexturedModel(OBJLoader.loadObjModel("grassModel", loader), new ModelTexture(loader.loadTexture("grassTexture")));
 		grass.getTexture().setHasTransparency(true);
 		grass.getTexture().setUseFakeLighting(true);
+		*/
 		
 		TexturedModel fern = new TexturedModel(OBJLoader.loadObjModel("fern", loader), new ModelTexture(loader.loadTexture("fern")));
 		fern.getTexture().setHasTransparency(true);
@@ -58,39 +60,47 @@ public class MainGameLoop {
 		//***********************************************
 		
 		
-		//******Spawn entities******
-		List<Entity> entities = new ArrayList<Entity>();
-		Random random = new Random();
-		for(int i=0;i<500;i++){
-			entities.add(new Entity(tree, new Vector3f(random.nextFloat()*800 - 400,0,random.nextFloat() * -600),0,0,0,6));
-			entities.add(new Entity(grass, new Vector3f(random.nextFloat()*800 - 400,0,random.nextFloat() * -600),0,0,0,1.5f));
-			entities.add(new Entity(fern, new Vector3f(random.nextFloat()*800 - 400,0,random.nextFloat() * -600),0,0,0,0.5f));
-		}
-		
-		//**************************
-		
-		
 		//******Initialize Light, Camera, Terrain, Renderer, ETC******
 		Light light = new Light(new Vector3f(20000,20000,2000),new Vector3f(1,1,1));
 		
-		Player player = new Player(stanfordBunny, new Vector3f(0, 0, -50), 0, 0, 0, 1);
+		Player player = new Player(stanfordBunny, new Vector3f(0, 0, 0), 0, 0, 0, 0.5f);
 		
-		Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap, "heightmap");
-		Terrain terrain2 = new Terrain(-1,-1,loader, texturePack, blendMap, "heightmap");
+		Terrain terrain = new Terrain(-0.5f,-1,loader, texturePack, blendMap, "heightmap");
 		
 		Camera camera = new Camera(player);	
 		MasterRenderer renderer = new MasterRenderer();
 		
 		//************************************************************
+
+		
+		//******Spawn entities******
+		List<Entity> entities = new ArrayList<Entity>();
+		Random random = new Random();
+		for(int i=0;i<400;i++){
+			if (i % 20 == 0) {
+				float x = random.nextFloat()*800 - 400;
+				float z = random.nextFloat() * -600;
+				float y = terrain.getHeightOfTerrain(x,z);
+				entities.add(new Entity(tree, new Vector3f(x,y,z),0,random.nextFloat() * 360 ,0,6));
+			}
+			
+			if (i % 10 == 0) {
+				float x = random.nextFloat()*800 - 400;
+				float z = random.nextFloat() * -600;
+				float y = terrain.getHeightOfTerrain(x,z);
+				entities.add(new Entity(fern, new Vector3f(x,y,z),0,random.nextFloat() * 360 ,0,0.5f));
+			}
+		}
+		
+		//**************************
 		
 		
 		//******Render******
-		while(!Display.isCloseRequested()){
+		while(!Display.isCloseRequested()){			
+			player.move(terrain);
 			camera.move();
-			player.move();
 			renderer.processEntity(player);
 			renderer.processTerrain(terrain);
-			renderer.processTerrain(terrain2);
 			for(Entity entity:entities){
 				renderer.processEntity(entity);
 			}
