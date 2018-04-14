@@ -49,8 +49,8 @@ public class MainGameLoop {
 		TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("grassFlowers"));
 		TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("path"));
 		TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
-		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blendMap"));
-		Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap, "heightmap");
+		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blendMap2"));
+		Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap, "heightmap2");
 		//*********************************
 		
 		
@@ -58,14 +58,14 @@ public class MainGameLoop {
 		//Load Player
 		TexturedModel character = new TexturedModel(OBJLoader.loadObjModel("person", loader), new ModelTexture(loader.loadTexture("playerTexture")));
 		character.getTexture().setHasTransparency(false);
-		Player player = new Player(character, new Vector3f(50, -10, -50), 0, 0, 0, 0.5f);
+		Player player = new Player(character, new Vector3f(50, -20, -50), 0, 0, 0, 0.5f);
 		
 		//Load Tree
 		TexturedModel tree = new TexturedModel(OBJLoader.loadObjModel("tree", loader),new ModelTexture(loader.loadTexture("tree")));
 		tree.getTexture().setHasTransparency(false);
 		
 		//Load Lamp
-		//TexturedModel lamp = new TexturedModel(OBJLoader.loadObjModel("lamp", loader),new ModelTexture(loader.loadTexture("lamp")));
+		TexturedModel lampEntity = new TexturedModel(OBJLoader.loadObjModel("lamp", loader),new ModelTexture(loader.loadTexture("lamp")));
 		//tree.getTexture().setHasTransparency(false);
 		
 		//Load Fern	
@@ -76,7 +76,8 @@ public class MainGameLoop {
 		
 		//Load Lights
 		List<Light> lights = new ArrayList<Light>();
-		lights.add(new Light(new Vector3f(20000,20000,20000), new Vector3f(0.4f,0.4f,0.4f)));
+		Light sun = new Light(new Vector3f(50, 1000, -1000), new Vector3f(0.4f, 0.4f, 0.4f));
+		lights.add(sun);
 		
 		//Load Camera
 		Camera camera = new Camera(player);	
@@ -114,13 +115,13 @@ public class MainGameLoop {
 			
 		
 		//******Water******
+		WaterFrameBuffers buffers = new WaterFrameBuffers();
 		WaterShader waterShader = new WaterShader();
-		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix());
+		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(), buffers);
 		List<WaterTile> waters = new ArrayList<WaterTile>();
 		WaterTile water = new WaterTile(50, -50, 0);
 		waters.add(water);
 		
-		WaterFrameBuffers buffers = new WaterFrameBuffers();
 		//*****************
 		
 		
@@ -129,10 +130,6 @@ public class MainGameLoop {
 		//GuiTexture gui = new GuiTexture(loader.loadTexture("health"), new Vector2f(-0.8f, 0.95f), new Vector2f(0.2f,0.25f));
 		//guis.add(gui);	
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
-		GuiTexture reflection = new GuiTexture(buffers.getReflectionTexture(), new Vector2f(-0.5f,0.5f), new Vector2f(0.25f, 0.25f));
-		guis.add(reflection);
-		GuiTexture refraction = new GuiTexture(buffers.getRefractionTexture(), new Vector2f(0.5f,0.5f), new Vector2f(0.25f, 0.25f));
-		guis.add(refraction);
 		//***************
 		
 				
@@ -151,19 +148,19 @@ public class MainGameLoop {
 			float distance = 2* (camera.getPosition().y - water.getHeight());
 			camera.getPosition().y -= distance;
 			camera.invertPitch();
-			renderer.renderScene(entities, terrain, lights, camera, player, new Vector4f(0, 1 , 0, -water.getHeight()));
+			renderer.renderScene(entities, terrain, lights, camera, player, new Vector4f(0, 1 , 0, -water.getHeight()+1));
 			camera.getPosition().y += distance;
 			camera.invertPitch();
 			
 			//Refraction Buffer
 			buffers.bindRefractionFrameBuffer();
-			renderer.renderScene(entities, terrain, lights, camera, player, new Vector4f(0, -1 , 0, water.getHeight()));
+			renderer.renderScene(entities, terrain, lights, camera, player, new Vector4f(0, -1 , 0, water.getHeight()+1));
 			
 			//Render to screen
 			GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
 			buffers.unbindCurrentFrameBuffer();
 			renderer.renderScene(entities, terrain, lights, camera, player, new Vector4f(0, -1, 0, 20));
-			waterRenderer.render(waters, camera);		
+			waterRenderer.render(waters, camera, sun);		
 			guiRenderer.render(guis);
 			
 			DisplayManager.updateDisplay();

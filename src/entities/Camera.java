@@ -5,11 +5,11 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class Camera {
 	
-	private float distanceFromPlayer = 50;
+	private float distanceFromPlayer = 100;
 	private float angleAroundPlayer = 0;
 	
 	private Vector3f position = new Vector3f(0,25,0);
-	private float pitch = 20;
+	private float pitch = 40;
 	private float yaw;
 	private float roll;
 	
@@ -76,7 +76,6 @@ public class Camera {
 	private void calculatePitch() {
 		if(Mouse.isButtonDown(1)) {
 			float pitchChange = Mouse.getDY() * 0.1f;
-			System.out.println(pitchChange);
 			if((pitch < 90 || pitchChange > 0) && (pitch > 10 || pitchChange < 0)) {
 				pitch -= pitchChange;
 			} 
