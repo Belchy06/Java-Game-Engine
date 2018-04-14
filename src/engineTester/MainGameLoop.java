@@ -3,17 +3,12 @@ package engineTester;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import models.RawModel;
 import models.TexturedModel;
-
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
-
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -50,7 +45,12 @@ public class MainGameLoop {
 		TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("path"));
 		TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
 		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blendMap2"));
-		Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap, "heightmap2");
+		
+		//Procedural terrain generation example
+		Terrain terrain = new Terrain(1,1,loader,texturePack,blendMap);
+		
+		// Height map terrain generation example
+		//Terrain terrain = new Terrain(0,-1,loader, texturePack, blendMap, "heightmap2");
 		//*********************************
 		
 		
@@ -58,15 +58,11 @@ public class MainGameLoop {
 		//Load Player
 		TexturedModel character = new TexturedModel(OBJLoader.loadObjModel("person", loader), new ModelTexture(loader.loadTexture("playerTexture")));
 		character.getTexture().setHasTransparency(false);
-		Player player = new Player(character, new Vector3f(50, -20, -50), 0, 0, 0, 0.5f);
+		Player player = new Player(character, new Vector3f(1200, 1, 1200), 0, 0, 0, 0.5f);
 		
 		//Load Tree
 		TexturedModel tree = new TexturedModel(OBJLoader.loadObjModel("tree", loader),new ModelTexture(loader.loadTexture("tree")));
 		tree.getTexture().setHasTransparency(false);
-		
-		//Load Lamp
-		TexturedModel lampEntity = new TexturedModel(OBJLoader.loadObjModel("lamp", loader),new ModelTexture(loader.loadTexture("lamp")));
-		//tree.getTexture().setHasTransparency(false);
 		
 		//Load Fern	
 		//ModelTexture fernTextureAtlas = new ModelTexture(loader.loadTexture("fernatlas"));
@@ -76,7 +72,7 @@ public class MainGameLoop {
 		
 		//Load Lights
 		List<Light> lights = new ArrayList<Light>();
-		Light sun = new Light(new Vector3f(50, 1000, -1000), new Vector3f(0.4f, 0.4f, 0.4f));
+		Light sun = new Light(new Vector3f(1000, 3000, 400), new Vector3f(0.4f, 0.4f, 0.4f));
 		lights.add(sun);
 		
 		//Load Camera
@@ -85,14 +81,12 @@ public class MainGameLoop {
 
 		
 		//******Spawn entities******
-		
-		List<Entity> entities = new ArrayList<Entity>();
-		
+		List<Entity> entities = new ArrayList<Entity>();	
 		Random random = new Random();
 		for(int i=0;i<400;i++){
 			if (i % 40 == 0) {
-				float x = random.nextFloat()*100;
-				float z = random.nextFloat() * -100;
+				float x = random.nextFloat()*100 + 800;
+				float z = random.nextFloat() * -100 + 800;
 				float y = terrain.getHeightOfTerrain(x,z);
 				entities.add(new Entity(tree, new Vector3f(x,y,z),0,0,0,3));
 			}
@@ -119,25 +113,20 @@ public class MainGameLoop {
 		WaterShader waterShader = new WaterShader();
 		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(), buffers);
 		List<WaterTile> waters = new ArrayList<WaterTile>();
-		WaterTile water = new WaterTile(50, -50, 0);
+		WaterTile water = new WaterTile(1200, 1200, 0);
 		waters.add(water);
-		
 		//*****************
 		
 		
 		//******GUI******
 		List<GuiTexture> guis = new ArrayList<GuiTexture>();
-		//GuiTexture gui = new GuiTexture(loader.loadTexture("health"), new Vector2f(-0.8f, 0.95f), new Vector2f(0.2f,0.25f));
-		//guis.add(gui);	
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 		//***************
 		
 				
 		//******Render******
-		
-		
 		while(!Display.isCloseRequested()){			
-			//player.move(terrain);
+			player.move(terrain);
 			camera.move();
 			picker.update();
 			
